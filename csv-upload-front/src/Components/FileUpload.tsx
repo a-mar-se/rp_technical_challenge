@@ -22,6 +22,7 @@ const FileUpload = () => {
             console.log('submitting file');
             let formData = new FormData();
             formData.append('file', csvFile);
+            formData.append('table', JSON.stringify(dataTypes));
             try{
                 axios.post(api_url + "csv_validation/validate", formData, {
                     headers: {
