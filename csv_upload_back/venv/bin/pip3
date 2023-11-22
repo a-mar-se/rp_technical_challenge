@@ -1,4 +1,4 @@
-#!/home/amarse/projects/RavenPack/rp_technical_challenge/csv_upload_back/venv/bin/python3.11
+#!/home/amarse/projects/RavenPack/rp_technical_challenge/csv_upload_back/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

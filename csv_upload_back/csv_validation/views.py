@@ -1,7 +1,13 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from rest_framework.views import APIView;
+from rest_framework.response import Response;
 
-
-def validate(request):
-    return HttpResponse("validating csv file...")
+class ValidateView(APIView):
+    def post(self, request):
+        print(request.data)
+        print(request.data["file"])
+        response = Response()
+        response.data = {
+            'message' : "validating csv file..."
+        }
+        return response
 
