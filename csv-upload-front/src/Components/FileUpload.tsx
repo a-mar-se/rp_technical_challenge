@@ -114,63 +114,70 @@ const FileUpload = () => {
     
 
     return(
-        <div>
-            <div>
-                <div style={{display:'flex', flexDirection:"row"}}>
-                    <div className="cell">data_types</div>
-                    <div className="cell">description</div>
-                    <div className="cell">extra validations</div>
-                </div>
-                {dataTypes.map(element=>{
-                    return (
-                        <div style={{display:'flex', flexDirection:"row"}}>
-                            <div className="cell">
-                                <div>{element.data_type}</div>
-                                {element.basic_data_type ?     
-                                    <div>Basic type: ({element.basic_data_type})</div>
+        <div style={{padding:"5px"}}>
+            <h1>CSV data_type validator</h1>
+            <h4>Create custom data_types and validations for them. Upload your CSV file with the columns "entity_id", "data_type" and "value" to check if any value is valid as its data_type.</h4>
+            <div style={{display:'flex', flexDirection:'column', justifyContent:'center'}}>
+                <div style={{display: "flex", flexDirection: "column", alignItems:'center', borderLeftWidth:"0px", borderRightWidth: "0px", borderColor: "white", borderStyle:"solid"}}>
+                    <h2>Data_types table</h2>
+                    <h5>These are the types that are going to be checked on your CSV file. Create new ones if the basics are too basic.</h5>
+                    <div  style={{display:'flex', flexDirection:"row"}}>
+                        <div className="cell cell-header">data_types</div>
+                        <div className="cell cell-header">description</div>
+                        <div className="cell cell-header">extra validations</div>
+                    </div>
+                    {dataTypes.map(element=>{
+                        return (
+                            <div style={{display:'flex', flexDirection:"row"}}>
+                                <div className="cell">
+                                    <div>{element.data_type}</div>
+                                    {element.basic_data_type ?     
+                                        <div>Basic type: ({element.basic_data_type})</div>
+                                        :
+                                        <></>
+                                    }
+                                </div>
+                                <div className="cell">{element.description}</div>
+                                {element.extra ?
+                                    <>
+                                        {element.extra.map(ei=>{
+                                            return <div className="cell">{ei.type} : {ei.value}</div>
+
+                                        })}
+                                    </>
                                     :
-                                    <></>
+                                    <div className="cell">None</div>
                                 }
                             </div>
-                            <div className="cell">{element.description}</div>
-                            {element.extra ?
-                                <>
-                                    {element.extra.map(ei=>{
-                                        return <div className="cell">{ei.type} : {ei.value}</div>
+                        )
+                    })}
 
-                                    })}
-                                </>
-                                :
-                                <div className="cell">None</div>
-                            }
+                    {!modalIsOpen?
+                        <div style={{display:'flex', flexDirection:"row"}}>
+                            <div className=""><button onClick={()=>setIsOpen(true)}>Add new custom data_type</button></div>
                         </div>
-                    )
-                })}
-
-                {!modalIsOpen?
-                    <div style={{display:'flex', flexDirection:"row"}}>
-                        <div className=""><button onClick={()=>setIsOpen(true)}>Add new custom data_type</button></div>
-                    </div>
+                        :
+                        <></>
+                    }
+                    
+                </div>
+                <h3>Upload you CSV files here</h3>
+                <div style={{display:"flex", flexDirection:"row", justifyContent:'center'}}>
+                    <input type="file" name="file" onChange={changeHandler} />
+                    <button onClick={handleSubmission} disabled={disabled}>Submit</button>
+                </div>
+                {error !== "" ?
+                    <div>{error}</div>
                     :
                     <></>
                 }
-                
-            </div>
-            <input type="file" name="file" onChange={changeHandler} />
-            <div>
-                <button onClick={handleSubmission} disabled={disabled}>Submit</button>
-            </div>
-            {error !== "" ?
-                <div>{error}</div>
-                :
-                <></>
-            }
 
-            {csvResponse !== "" ?
-                <div>{csvResponse}</div>
-                :
-                <></>
-            }
+                {csvResponse !== "" ?
+                    <div>{csvResponse}</div>
+                    :
+                    <></>
+                }
+            </div>
             {csvResponse !== "" ?
                 <div>{recordsErrors.map(e=>{
                     console.log({e})
