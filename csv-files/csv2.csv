@@ -2,3 +2,4 @@ entity_id,data_type,data_value
 DD3BB1,favicon,https://www.tesla.com/themes/custom/tesla_frontend/assets/favicons/favicoin.ico
 DD3BB2,favicon,https://www.tesla.com/themes/custom/tesla_frontend/assets/favicons/favicoin2.ico
 DD3BB3,favicon,https://www.tesla.com/themes/custom/tesla_frontend/assets/favicons/favicoin.ico3
+DD3BB4,decimal,8.8

@@ -3,7 +3,9 @@ from rest_framework.response import Response;
 import csv;
 import pathlib;
 import pandas;
-import json;
+import json
+
+from .validators import data_type_validator;
 from .serializer import EntitySerializer;
 
 class ValidateView(APIView):
@@ -19,33 +21,29 @@ class ValidateView(APIView):
         # print(csv_file)
         r = pandas.read_csv(csv_file)
         csv_records = len(r.index)
-        print(csv_records)
-        # print(r.iloc[0])
+        error_data = []
 
         for element_index in range(csv_records):
             element = r.iloc[element_index]
-            print(element)
+            data_type_found = False
             for dt_index in range(len(data_types_table)):
                 dt_checked = data_types_table[dt_index]
-                print(dt_checked)
-                print(dt_checked["data_type"])
-                print(element["data_type"])
                 if element["data_type"] == dt_checked["data_type"]:
-                    print("true")
-                else:
-                    print("fgalse")
-        
-        # re = csv_file.read()
-        # print(re)
-        # with open(csv_file.temporary_file_path(), 'r') as file_obj: 
-        #     print(', '.join(file_obj))
-        # spamreader = csv.reader(csv_file, delimiter=',')
-        # print(spamreader)
-        # ifile  = open(csv_file, "rt", encoding=<theencodingofthefile>)
-        # for row in spamreader:
-        #     print(', '.join(row))
-        response.data = {
-            'message' : "validating csv file..."
-        }
+                    data_type_found = True
+                    # Check validations depending on the data type
+                    validation = data_type_validator(element["data_value"],dt_checked["data_type"])
+                    if (validation != True):
+                        str_val = str(validation)
+                        print(str_val)
+                        error_data.append("ValidationError: Entity_id \'" + element["entity_id"] + "\' with data_type '" + element["data_type"] + "'. " + str_val)
+                    
+                
+            if data_type_found == False:
+                response.data({'error': 'Record ' + element["entity_id"] + ' has a data_type not defined: ' + element["data_type"]})
+        # response.data = {
+        #     'message' : "validating csv file..."
+        # }
+        if error_data != '':
+            response.data={'error':error_data}
         return response
 
