@@ -1,8 +1,22 @@
 import React from "react";
 import axios from "axios";
+import Modal from 'react-modal';
+import AddTypeModal from "./AddTypeModal.tsx";
+
+interface DataTypeInterface {
+    data_type: string,
+    description: string,
+    extra?: [ExtraValidationInterface],
+    basic_data_type?: string
+}
+
+interface ExtraValidationInterface {
+    type: string,
+    value: string
+}
 
 const FileUpload = () => {
-    const default_data_types = [
+    const default_data_types:Array<DataTypeInterface> = [
         {data_type:"decimal", description:"Checks if it is a decimal number"},
         {data_type:"integer", description:"Checks if it is an integer number"},
         {data_type:"string", description:"Checks if it is a string"},
@@ -10,6 +24,7 @@ const FileUpload = () => {
         {data_type:"favicon", description:"Checks if it is a valid url"},
     ];
 
+    const [modalIsOpen, setIsOpen] = React.useState(false);
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
     const [disabled, setDisabled] = React.useState<boolean>(true);
     const [error,setError] = React.useState<string>("")
@@ -69,6 +84,16 @@ const FileUpload = () => {
         }
     }
 
+
+    
+
+    function afterOpenModal() {
+    }
+
+    function closeModal() {
+        setIsOpen(false);
+    }
+
     const changeHandler = (e) => {
         const csv = e.target.files[0]
         setCsvFile(csv)
@@ -77,17 +102,6 @@ const FileUpload = () => {
         setCsvResponse("Use the submit button to check if your data passes validation.")
     }
 
-    const add_custom_row = () => {
-        setAddEnabled(true)
-    }
-
-    const save_new_data_type = () => {
-        setAddEnabled(false);
-        const updated_data_types = [...dataTypes,{data_type: newDataType, description: newDescription}];
-        setDataTypes(updated_data_types);
-        setNewDataType("");
-        setNewDescription("");
-    }
 
     const update_data_type = (e) => {
         setNewDataType(e.target.value)
@@ -97,6 +111,7 @@ const FileUpload = () => {
         setNewDescription(e.target.value)
     }
     
+    
 
     return(
         <div>
@@ -104,31 +119,40 @@ const FileUpload = () => {
                 <div style={{display:'flex', flexDirection:"row"}}>
                     <div className="cell">data_types</div>
                     <div className="cell">description</div>
+                    <div className="cell">extra validations</div>
                 </div>
                 {dataTypes.map(element=>{
                     return (
                         <div style={{display:'flex', flexDirection:"row"}}>
-                            <div className="cell">{element.data_type}</div>
+                            <div className="cell">
+                                <div>{element.data_type}</div>
+                                {element.basic_data_type ?     
+                                    <div>Basic type: ({element.basic_data_type})</div>
+                                    :
+                                    <></>
+                                }
+                            </div>
                             <div className="cell">{element.description}</div>
+                            {element.extra ?
+                                <>
+                                    {element.extra.map(ei=>{
+                                        return <div className="cell">{ei.type} : {ei.value}</div>
+
+                                    })}
+                                </>
+                                :
+                                <div className="cell">None</div>
+                            }
                         </div>
                     )
                 })}
-                {addEnabled ?
+
+                {!modalIsOpen?
                     <div style={{display:'flex', flexDirection:"row"}}>
-                        <input className="cell" type="string" onChange={update_data_type} placeholder="Data_type_name"/>
-                        <input className="cell"  onChange={update_description} placeholder="Description"/>
+                        <div className=""><button onClick={()=>setIsOpen(true)}>Add new custom data_type</button></div>
                     </div>
                     :
                     <></>
-                }
-                {addEnabled ?
-                    <div style={{display:'flex', flexDirection:"row"}}>
-                        <div className="cell"><button onClick={()=>save_new_data_type()}>Save new data_type</button></div>
-                    </div>
-                    :
-                    <div style={{display:'flex', flexDirection:"row"}}>
-                        <div className="cell"><button onClick={()=>add_custom_row()}>Add new data_type</button></div>
-                    </div>
                 }
                 
             </div>
@@ -168,6 +192,16 @@ const FileUpload = () => {
                 :
                 <></>
             }
+
+            <Modal
+                isOpen={modalIsOpen}
+                onAfterOpen={afterOpenModal}
+                onRequestClose={closeModal}
+                // style={customStyles}
+                contentLabel="Example Modal"
+            >
+                <AddTypeModal default_data_types={default_data_types} dataTypes={dataTypes} setDataTypes={setDataTypes} closeModal={closeModal}/>
+            </Modal>
         </div>
     )
 }
