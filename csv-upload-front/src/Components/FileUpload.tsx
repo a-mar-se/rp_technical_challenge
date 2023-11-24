@@ -17,6 +17,10 @@ const FileUpload = () => {
     const [addEnabled, setAddEnabled] = React.useState(false);
     const [newDataType,setNewDataType] = React.useState<string>("")
     const [newDescription,setNewDescription] = React.useState<string>("")
+    const [csvResponse,setCsvResponse] = React.useState<string>("")
+    const [validationError,setValidationError] = React.useState<string>("")
+
+    const [recordsErrors,setRecordsErrors] = React.useState([])
 
     const api_url = "http://localhost:8000/"
     const handleSubmission = async () => {
@@ -30,7 +34,21 @@ const FileUpload = () => {
                     headers: {
                       'Content-Type': 'multipart/form-data'
                     }
-                }).then(response => response).catch(err=>console.error(err));
+                }).then(response => {
+                    if (response.data === ''){
+                        console.log("All in order on your csv file")
+                        setCsvResponse("All in order on your csv file")
+                    }
+                    else{
+                        if (response.data.error !== undefined){
+                            console.log("Error during validation")
+                            console.log(response)
+                            setCsvResponse("Error during validation")
+                            setRecordsErrors(response.data.error)
+                        }
+
+                    }
+                }).catch(err=>console.error(err));
 
                 // const val = await axios.post(api_url + "csv_validation/validate",{
                 //     file: "fillli",
@@ -55,6 +73,8 @@ const FileUpload = () => {
         const csv = e.target.files[0]
         setCsvFile(csv)
         setDisabled(false)
+
+        setCsvResponse("Use the submit button to check if your data passes validation.")
     }
 
     const add_custom_row = () => {
@@ -118,6 +138,33 @@ const FileUpload = () => {
             </div>
             {error !== "" ?
                 <div>{error}</div>
+                :
+                <></>
+            }
+
+            {csvResponse !== "" ?
+                <div>{csvResponse}</div>
+                :
+                <></>
+            }
+            {csvResponse !== "" ?
+                <div>{recordsErrors.map(e=>{
+                    console.log({e})
+                    return <div>
+                        <div style={{display:'flex', flexDirection:"row"}}>
+                            <div className="cell">entity_id</div>
+                            <div className="cell">data_type</div>
+                            <div className="cell">value</div>
+                            <div className="cell">error description</div>
+                        </div>
+                        <div style={{display:'flex', flexDirection:"row"}}>
+                            <div className="cell">{e.entity_id}</div>
+                            <div className="cell">{e.data_type}</div>
+                            <div className="cell">{e.value}</div>
+                            <div className="cell">{e.error_description}</div>
+                        </div>
+                    </div>
+                })}</div>
                 :
                 <></>
             }

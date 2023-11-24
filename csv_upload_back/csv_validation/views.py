@@ -35,7 +35,8 @@ class ValidateView(APIView):
                     if (validation != True):
                         str_val = str(validation)
                         print(str_val)
-                        error_data.append("ValidationError: Entity_id \'" + element["entity_id"] + "\' with data_type '" + element["data_type"] + "'. " + str_val)
+                        error_data.append({"value": element["data_value"],"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": str_val})
+                        # error_data.append("ValidationError: Entity_id \'" + element["entity_id"] + "\' with data_type '" + element["data_type"] + "'. " + str_val)
                     
                 
             if data_type_found == False:
@@ -43,7 +44,8 @@ class ValidateView(APIView):
         # response.data = {
         #     'message' : "validating csv file..."
         # }
-        if error_data != '':
+        print(error_data)
+        if len(error_data) != 0:
             response.data={'error':error_data}
         return response
 
