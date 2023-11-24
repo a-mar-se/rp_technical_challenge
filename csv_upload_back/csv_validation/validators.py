@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator, DecimalValidator, RegexValidator
+from django.forms import DecimalField, IntegerField
 
 def data_type_validator(value, data_type, n_decimals = None):
     match data_type:
@@ -22,13 +23,20 @@ def data_type_validator(value, data_type, n_decimals = None):
             # return val(value)
         case "integer":
             print('integer')
-            reg = "\d"
+            # reg = 'r"[+-]?(?<!\.)\b[0-9]+\b(?!\.[0-9])"'
+            reg = '^[-+]?\d+$'
             try:
-                val = RegexValidator(reg, "please provide a decimal number", "Wrong decimal format")
+                # f = IntegerField(max_value=10^8 - 1)
+                # print(f)
+                # re = f(value)
+                # print(re)
+                val = RegexValidator(reg, "please provide an integer number", "Wrong integer format")
                 re = val(value)
+                print("validation error on integer. Right")
                 print(re)
                 return True
             except ValidationError as e:
+                print("validation error on integer. Wrong")
                 print(e)
                 return e
         case "string":
@@ -47,9 +55,8 @@ def data_type_validator(value, data_type, n_decimals = None):
             # decimal_regex()
             print('favicon')
             try:
-                URLValidator(value,"Please provide a valid url")
-                # url is valid here
-                # do something, such as:
+                vaa = URLValidator(message = "Please provide a valid url")
+                vaa(value)
                 return True
             except ValidationError as exception:
                 # URL is NOT valid here.
@@ -69,13 +76,16 @@ def data_type_validator(value, data_type, n_decimals = None):
             # decimal_regex()
             print('url')
             try:
-                URLValidator(value,"Please provide a valid url")
+                vaa = URLValidator(message = "Please provide a valid url")
+                vaa(value)
+                # URLValidator(value,"Please provide a valid url")
                 # url is valid here
                 # do something, such as:
                 return True
             except ValidationError as exception:
                 # URL is NOT valid here.
                 # handle exception..
+                print("ValidationError exception")
                 print(exception)
                 return exception
 
