@@ -15,6 +15,8 @@ interface ExtraValidationInterface {
 
 const FileUpload = ({dataTypes}) => {
 
+    const [timeTaken,setTimeTaken] = React.useState<number>(0)
+    const [maxDocuments,setMaxDocuments] = React.useState<number>(100)
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
     const [disabled, setDisabled] = React.useState<boolean>(true);
     const [error,setError] = React.useState<string>("")
@@ -24,6 +26,7 @@ const FileUpload = ({dataTypes}) => {
     const api_url = "http://localhost:8000/"
     const handleSubmission = async () => {
         if (csvFile !== null){
+            const first_time = Date.now()
             let formData = new FormData();
             formData.append('file', csvFile);
             formData.append('table', JSON.stringify(dataTypes));
@@ -43,8 +46,9 @@ const FileUpload = ({dataTypes}) => {
                             setCsvResponse("Error during validation. Check the wrong values below.")
                             setRecordsErrors(response.data.error)
                         }
-
                     }
+                    const second_time = Date.now()
+                    setTimeTaken((second_time - first_time) /1000)
                 }).catch(err=>console.error(err));
 
                 // const val = await axios.post(api_url + "csv_validation/validate",{
@@ -75,6 +79,10 @@ const FileUpload = ({dataTypes}) => {
         setCsvResponse("Use the submit button to check if your data passes validation.")
     }   
 
+    const showMore = () => {
+        setMaxDocuments(maxDocuments + 100)
+    }
+
     return(
         <div style={{display:'flex', flexDirection:'column', justifyContent:'center'}}>    
             <h3>Upload you CSV files here</h3>
@@ -93,9 +101,30 @@ const FileUpload = ({dataTypes}) => {
                 :
                 <></>
             }
+            
             {csvResponse !== "" ?
-                <div>{recordsErrors.map(e=>{
-                    return <div>
+                <div>Time taken to validate: {timeTaken === 0 ? "calculating" : timeTaken} s</div>
+                :
+                <></>
+            }
+
+            {csvResponse !== "" ?
+                
+                <div>
+                    Total number of errors: {timeTaken=== 0 ? "calculating" : recordsErrors.length}
+                    {recordsErrors.length > maxDocuments ? 
+                        <div>
+                            <div>There are more many documents with errors, do you want to show more? Be aware! Browser can break (Uncaught InternalError: too much recursion)</div>
+                            <button onClick={showMore}>Show more</button>
+                        </div>
+                        :
+                        <></>
+                        }
+                    {recordsErrors.map((e,index)=>{
+                    if (index > maxDocuments){
+                        return <></>
+                    }
+                    return <div key={"error_" + index}>
                         <div style={{display:'flex', flexDirection:"row"}}>
                             <div className="cell cell-header">entity_id</div>
                             <div className="cell cell-header">data_type</div>

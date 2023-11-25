@@ -44,7 +44,7 @@ const Page = () => {
       <div className="App-header" style={{padding: "10px"}}>
         <Intro/>
         <DataTypeTable dataTypes={dataTypes} openModal={openModal}/>
-        <FileUpload dataTypes={dataTypes}/>
+        <FileUpload dataTypes={dataTypes} />
         <AddTypeModal default_data_types={default_data_types} dataTypes={dataTypes} setDataTypes={setDataTypes} closeModal={closeModal} modalIsOpen={modalIsOpen} />
       </div>
     </div>
