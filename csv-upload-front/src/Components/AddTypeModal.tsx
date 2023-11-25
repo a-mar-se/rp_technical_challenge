@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Modal from 'react-modal';
 import Select from 'react-select';
+import Modal from  'react-modal';
+import InputComp from "./Modal/InputComp.tsx";
+import NumberInputComp from "./Modal/NumberInputComp.tsx";
 
 interface OptionInterface {
     label: string,
@@ -13,10 +14,11 @@ interface ExtraValidationInterface {
     value: string
 }
 
-const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal}) => {
+const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, modalIsOpen}) => {
     const extra_options = [
         { value: 'max_length', label: 'Maximum length' },
         { value: 'starting_with', label: 'Starting with' },
+        { value: 'contains', label: 'Contains characters' },
         { value: 'ending_with', label: 'Ending with' },
     ];
 
@@ -28,6 +30,8 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal})
     const [name, setName] = useState<string>("custom_data_type"); 
     const [description, setDescription] = useState<string>("new_data_type"); 
     const [extraValue, setExtraValue] = useState<string>(''); 
+    const [nDecimals, setNDecimals] = useState<number>(0); 
+    const [decimalPoint, setDecimalPoint] = useState<string>('.'); 
     const [options, setOptions] = useState<Array<OptionInterface>>([]); 
     const [extraOptions, setExtraOptions] = useState<Array<OptionInterface>>(extra_options); 
     const [extraValidations, setExtraValidations] = useState<Array<ExtraValidationInterface>>([]); 
@@ -43,29 +47,9 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal})
     },[])
 
 
-    const changeName = (e)=>{
-        setName(e.target.value)
-    }
-
-    const changeDescription = (e)=>{
-        setDescription(e.target.value)
-    }
-
-    const changeExtraValue = (e)=>{
-        setExtraValue(e.target.value)
-    }
-
-    const changeExtraValueNum = (e)=>{
-        if (e.target.validity.valid){
-            setExtraValue(e.target.value)
-        }
-    }
-
     
 
-    const removeCondition = (e)=>{
-        console.log("remove condition")
-        console.log(e)
+    const removeExtraValidation = (e)=>{
         let extra_options_exists = false;
         extraOptions.forEach(el=>{
             if (el.label === e.type){
@@ -98,7 +82,7 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal})
     }
 
 
-    const create_new_data_type = () =>{
+    const createNewDataType = () =>{
         let data_type_exists = false;
         if (!selectedOption){
             return
@@ -110,13 +94,30 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal})
         });
 
         if (!data_type_exists){
-            const updated_data_types = [...dataTypes,{
-                data_type: name, 
-                description: description, 
-                extra:extraValidations.length > 0 ? extraValidations : null,
-                basic_data_type: selectedOption?.value
-            }];
-            setDataTypes(updated_data_types);
+            
+            if (selectedOption.value !== "decimal"){
+                const updated_data_types = [...dataTypes,{
+                    data_type: name, 
+                    description: description, 
+                    extra:extraValidations.length > 0 ? extraValidations : null,
+                    basic_data_type: selectedOption?.value
+                }];
+                setDataTypes(updated_data_types);
+            }
+            else{
+                const aux_extra_validations = [...extraValidations,{type: "decimal_point",value:decimalPoint}]
+                if (nDecimals !== 0){
+                    aux_extra_validations.push({type: "n_decimals",value:""+nDecimals})
+                }
+                const updated_data_types = [...dataTypes,{
+                    data_type: name, 
+                    description: description, 
+                    extra: aux_extra_validations,
+                    basic_data_type: selectedOption?.value
+                }];
+                setDataTypes(updated_data_types);
+                
+            }
             closeModal()
         }
         else{
@@ -126,94 +127,158 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal})
 
 
     return(
-        <div>
-            <h2>Create custom data_types</h2>
-            <button id="close_button" onClick={closeModal}>Close modal</button>
-            <div>Data_type name</div>
-            
-            <input type="text" name="data_type_name" onChange={changeName} value={name}/>
-
-            <div>Data_type description</div>
-            
-            <input type="text" name="data_type_description" onChange={changeDescription} value={description}/>
-
-            <div>Basic datatype</div>
-            <Select
-                value={selectedOption}
-                onChange={(e:OptionInterface|null)=>{
-                    console.log(e)
-                    if (e!== undefined && e !==null){
-                        setTypeIsSelected(true)
-                        setSelectedOption(e)}}
-                    }
-                options={options}
-                isDisabled={!selectedEnabled}
-            />
-
-            {selectedOption !== null ?
-                <div>
-                    <div>Extra Validations: customize your validations</div>
-                    <div>
-                        {extraValidations.length > 0 ?
-                            <div style={{display:"flex", flexDirection:"row"}}>
-                                <div className="cell">Condition</div>
-                                <div className="cell">Condition value</div>
-                            </div>
-                            :
-                            <></>
-                        }
-                        {extraValidations.map(e=>{
-                            console.log(e)
-                            return <div style={{display:"flex", flexDirection:"row"}}>
-                                    <div className="cell">{e.type}</div>
-                                    <div className="cell">{e.value}</div>
-                                    <button onClick={()=>removeCondition(e)}>Remove conditon</button>
-                                </div>
-                        })}
-                    </div>
-                    <div style={{display:"flex", flexDirection:"row"}}>
-                        <Select
-                            value={selectedExtraOption}
-                            onChange={(e:OptionInterface|null)=>{
-                                if (e!== undefined && e !==null){
-                                    setSelectedExtraOption(e)}}
-                                }
-                            options={extraOptions}
-                        />
-                        {selectedExtraOption !== null ?
-                            <>
-                                {console.log(selectedExtraOption)}
-                                {selectedExtraOption.value === "max_length" ?
-                                    <input type="text" name="extra" pattern="[0-9]*" onChange={changeExtraValueNum} value={extraValue}/>
-                                    
-                                    :
-                                    <input type="text" name="extra" onChange={changeExtraValue} value={extraValue}/>
-                                }
-                            </>
-                            :
-                            <></>
-                            }
-                        {selectedExtraOption!==null && extraValue!==''?
-                            <button onClick={addExtraValidation}>Add extra validation</button>    
-                            :
-                            <div>Please select a condition and a value</div>
-
-                        }
-                        {/* <button onClick={addExtraValidation} disabled={}>Add extra validation</button> */}
-                    </div>
+        <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+            >
+            <div style={{}}>
+                <h2>Create custom data_types</h2>
+                <button id="close_button" onClick={closeModal}>Close modal</button>
+                
+                <div className="section row">
+                    <div>Data_type name</div>
+                    <InputComp changeInput={setName} inputValue={name} />
                 </div>
-                :
-                <></>
-            }
-            
 
-            <button onClick={create_new_data_type} disabled={!typeIsSelected} title={!typeIsSelected ? "Select a basic data_type to enable" : undefined}>Create data_type: "{name}"</button>
-            {error ?
-                <div>There is an error saving your new data_type. Maybe you are using an already existing data_type name?</div>
-                :
-                <></>
-            }
-        </div>
+                <div className="section row">
+                    <div>Data_type description</div>
+                    <InputComp changeInput={setDescription} inputValue={description} />
+                </div>
+
+                {/* Simple data_type selection: integer, decimal, string or url */}
+                <div className="section row">
+                    <div>Basic datatype</div>
+                    <Select
+                        value={selectedOption}
+                        onChange={(e:OptionInterface|null)=>{
+                            if (e!== undefined && e !==null){
+                                setTypeIsSelected(true)
+                                setSelectedOption(e)}}
+                            }
+                        options={options}
+                        isDisabled={!selectedEnabled}
+                    />
+                </div>
+
+                {/* Once you select your basic data_type, there will appear some components to allow to customize the validation */}
+                {selectedOption !== null ?
+                    <div className="section">
+                        <h5>Extra Validations: customize your validations</h5>
+                        {/* This is a table showing your custom conditions for validation */}
+                        <div>
+                            {/* Table headers */}
+                            <div style={{display:"flex", flexDirection:"row"}}>
+                                <div className="cell dark-border">Condition</div>
+                                <div className="cell dark-border">Condition value</div>
+                            </div>
+
+                            {/* Your already defined custom conditions to your custom data_type  */}
+                            {extraValidations.map(e=>{
+                                return <div style={{display:"flex", flexDirection:"row"}}>
+                                        <div className="cell dark-border">{e.type}</div>
+                                        <div className="cell dark-border">{e.value}</div>
+                                        <button onClick={()=>removeExtraValidation(e)}>Remove conditon</button>
+                                    </div>
+                            })}
+                            
+                            {selectedOption.label === "Decimal" ?
+                                <div style={{display: "flex", flexDirection:'row'}}>
+                                    <div className="cell dark-border">Decimal point</div>
+                                    <div className="cell dark-border" >
+                                        <div className="row">
+                                            <label>
+                                                <input type="checkbox" checked={decimalPoint === '.'}
+                                                    onChange={() => setDecimalPoint('.')}
+                                                    />
+                                                <span>.</span>
+                                            </label>
+                                        </div>
+                                        <div className="row">
+                                            <label>
+                                                <input type="checkbox" checked={decimalPoint === ','}
+                                                    onChange={() => setDecimalPoint(',')}
+                                                    />
+                                                <span>,</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                :
+                                <></>
+                            }
+
+
+                            {selectedOption.label === "Decimal" ?
+                                <div style={{display: "flex", flexDirection:'row'}}>
+                                    <div className="cell dark-border">Number of decimals</div>
+                                    <div className="cell dark-border" >
+                                        <div className="row">
+                                            <label>
+                                                <NumberInputComp changeInput={setNDecimals} inputValue={nDecimals}/>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className="cell dark-border" >
+                                        <div>(0 for any number of decimals)</div>
+                                    </div>
+                                </div>
+                                :
+                                <></>
+                            }
+
+                            {/* Adding conditions to your custom data_type  */}
+                            <div style={{display:"flex", flexDirection:"row"}}>
+                                {/* Select extra conditions for validation of your custom data_type */}
+                                <div className="cell dark-border">
+                                    <Select
+                                        value={selectedExtraOption}
+                                        onChange={(e:OptionInterface|null)=>{
+                                            if (e!== undefined && e !==null){
+                                                setSelectedExtraOption(e)}}
+                                            }
+                                        options={extraOptions}
+                                    />
+                                </div>
+
+                                {/* If an extra condition is selected, there will appear a textbox to include the condition value. */}
+                                {selectedExtraOption !== null ?
+                                    <div className="cell dark-border">
+                                        {selectedExtraOption.value === "max_length" ?
+                                            <NumberInputComp changeInput={setExtraValue} inputValue={extraValue} />
+                                            :
+                                            <InputComp changeInput={setExtraValue} inputValue={extraValue} />
+                                        }
+                                    </div>
+                                    :
+                                    <></>
+                                }
+                                {/* If an extra condition is selected and a value different from "" assigned, a button will appear to store the new condition. */}
+                                {selectedExtraOption!==null && extraValue!==''?
+                                    <button onClick={addExtraValidation}>Add extra validation</button>    
+                                    :
+                                    <div>Select a condition and a value</div>
+
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                    :
+                    <></>
+                }
+                
+                {/* This is the button to store the newly created data_type. Clicking it will close the modal and inmediately show all default data_types with your custom ones. */}
+                <button onClick={createNewDataType} disabled={!typeIsSelected} title={!typeIsSelected ? "Select a basic data_type to enable" : undefined}>Create data_type: "{name}"</button>
+                
+                {/* Error message when there are problems storing the custom data_type */}
+                {error ?
+                    <div>There is an error saving your new data_type. Maybe you are using an already existing data_type name?</div>
+                    :
+                    <></>
+                }
+            </div>
+        </Modal>
     )
 }
 
