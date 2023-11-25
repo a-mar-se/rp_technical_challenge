@@ -24,8 +24,8 @@ const DataTypeTable = ({dataTypes, openModal}) => {
                         <div className="cell">{element.description}</div>
                         {element.extra ?
                             <div className="cell">
-                                {element.extra.map(ei=>{
-                                    return <div >{ei.type} : {ei.value}</div>
+                                {Object.keys(element.extra).map(kei=>{
+                                    return <div >{kei} : {element.extra[kei]}</div>
 
                                 })}
                             </div>

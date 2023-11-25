@@ -10,9 +10,7 @@ from .serializer import EntitySerializer;
 
 class ValidateView(APIView):
     def post(self, request):
-        # print(request.data)
-        # print(request.data["file"])
-
+        
         csv_file = request.data["file"]
         csv_file = request.FILES["file"]
         data_types_table = json.loads(request.data["table"])
@@ -31,16 +29,17 @@ class ValidateView(APIView):
                 if element["data_type"] == dt_checked["data_type"]:
                     data_type_found = True
                     # Check validations depending on the data type
-                    validation = data_type_validator(element["data_value"],dt_checked["data_type"])
+                    validation = data_type_validator(element["data_value"],dt_checked["data_type"], data_types_table[dt_index])
                     if (validation != True):
                         str_val = str(validation)
                         print(str_val)
-                        error_data.append({"value": element["data_value"],"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": str_val})
+                        error_data.append({"value": str(element["data_value"]),"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": str_val})
                         # error_data.append("ValidationError: Entity_id \'" + element["entity_id"] + "\' with data_type '" + element["data_type"] + "'. " + str_val)
                     
                 
             if data_type_found == False:
-                response.data({'error': 'Record ' + element["entity_id"] + ' has a data_type not defined: ' + element["data_type"]})
+                error_data.append({"value": str(element["data_value"]),"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": "has a data_type not defined. Define the data_type on the table above to validate."})
+                # response.data({'error': 'Record ' + element["entity_id"] + ' has a data_type not defined: ' + element["data_type"]})
         # response.data = {
         #     'message' : "validating csv file..."
         # }

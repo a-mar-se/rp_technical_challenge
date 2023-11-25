@@ -24,7 +24,6 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, 
 
     const [selectedOption, setSelectedOption] = useState<OptionInterface|null>(null); 
     const [selectedExtraOption, setSelectedExtraOption] = useState<OptionInterface | null>(null); 
-    const [selectedEnabled, setSelectedEnabled] = useState<boolean>(false); 
     const [error, setError] = useState<boolean>(false); 
     const [typeIsSelected, setTypeIsSelected] = useState<boolean>(false); 
     const [name, setName] = useState<string>("custom_data_type"); 
@@ -34,42 +33,72 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, 
     const [decimalPoint, setDecimalPoint] = useState<string>('.'); 
     const [options, setOptions] = useState<Array<OptionInterface>>([]); 
     const [extraOptions, setExtraOptions] = useState<Array<OptionInterface>>(extra_options); 
-    const [extraValidations, setExtraValidations] = useState<Array<ExtraValidationInterface>>([]); 
+    const [extraValidations, setExtraValidations] = useState({}); 
     
 
     useEffect(()=>{
+        setting_default_options()
+    },[])
+
+    const setting_default_options = () => {
         const aux_arr: Array<OptionInterface> = []
         default_data_types.forEach(e=>{
             aux_arr.push({ value: e.data_type, label: e.data_type.charAt(0).toUpperCase() + e.data_type.slice(1)  });
         })
         setOptions(aux_arr)
-        setSelectedEnabled(true)
-    },[])
+    }
+
+    // Reset state when opening or closing modal
+    useEffect(()=>{
+        setSelectedOption(null)
+        setSelectedExtraOption(null)
+        setError(false)
+        setTypeIsSelected(false)
+        setName("custom_data_type")
+        setDescription("new_data_type")
+        setExtraValue('')
+        setNDecimals(0)
+        setDecimalPoint('.')
+        setExtraOptions(extra_options)
+        setExtraValidations({})
+        setting_default_options()
+    },[modalIsOpen])
 
 
     
 
     const removeExtraValidation = (e)=>{
-        let extra_options_exists = false;
-        extraOptions.forEach(el=>{
-            if (el.label === e.type){
-                extra_options_exists = true
+        if (Object.entries(extraValidations).length > 0){
+            let extra_options_exists = false;
+            extraOptions.forEach(el=>{
+                if (el.label === e.type){
+                    extra_options_exists = true
+                }
+            })
+            if (!extra_options_exists){
+                setExtraOptions([...extraOptions,{label: e.type,value:extraValue}])
             }
-        })
-        if (!extra_options_exists){
-            setExtraOptions([...extraOptions,{label: e.type,value:extraValue}])
+            
+            let aux_extra_validations = {}
+            for (let key in extraValidations) {
+                if (key !== e.type){
+                    aux_extra_validations[key] = extraValidations[key].value
+                }
+            }
+            console.log(aux_extra_validations)
+            setExtraValidations(aux_extra_validations)
+            // setExtraValidations(extraValidations.filter(elem=>{
+            //     if (elem.type !== e.type){
+            //         return elem;
+            //     }
+            // }))
         }
-
-        setExtraValidations(extraValidations.filter(elem=>{
-            if (elem.type !== e.type){
-                return elem;
-            }
-        }))
     }
 
     const addExtraValidation = ()=>{
         if (selectedExtraOption){
-            const new_validations = [...extraValidations,{type: selectedExtraOption.label,value:extraValue}]
+            let new_validations = extraValidations
+            new_validations[selectedExtraOption.value] = extraValue;
             setExtraValidations(new_validations)
             setExtraOptions(extraOptions.filter(elem=>{
                 if (selectedExtraOption && elem.value !== selectedExtraOption.value){
@@ -99,16 +128,17 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, 
                 const updated_data_types = [...dataTypes,{
                     data_type: name, 
                     description: description, 
-                    extra:extraValidations.length > 0 ? extraValidations : null,
+                    extra:Object.keys(extraValidations).length > 0 ? extraValidations : null,
                     basic_data_type: selectedOption?.value
                 }];
                 setDataTypes(updated_data_types);
             }
             else{
-                const aux_extra_validations = [...extraValidations,{type: "decimal_point",value:decimalPoint}]
+                let aux_extra_validations = extraValidations
+                aux_extra_validations["decimal_point"] =decimalPoint
                 if (nDecimals !== 0){
-                    aux_extra_validations.push({type: "n_decimals",value:""+nDecimals})
-                }
+                    aux_extra_validations["n_decimals"] = "" + nDecimals
+                } 
                 const updated_data_types = [...dataTypes,{
                     data_type: name, 
                     description: description, 
@@ -156,7 +186,6 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, 
                                 setSelectedOption(e)}}
                             }
                         options={options}
-                        isDisabled={!selectedEnabled}
                     />
                 </div>
 
@@ -173,11 +202,11 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, 
                             </div>
 
                             {/* Your already defined custom conditions to your custom data_type  */}
-                            {extraValidations.map(e=>{
+                            {Object.keys(extraValidations).map(key=>{
                                 return <div style={{display:"flex", flexDirection:"row"}}>
-                                        <div className="cell dark-border">{e.type}</div>
-                                        <div className="cell dark-border">{e.value}</div>
-                                        <button onClick={()=>removeExtraValidation(e)}>Remove conditon</button>
+                                        <div className="cell dark-border">{key}</div>
+                                        <div className="cell dark-border">{extraValidations[key]}</div>
+                                        <button onClick={()=>removeExtraValidation(key)}>Remove conditon</button>
                                     </div>
                             })}
                             

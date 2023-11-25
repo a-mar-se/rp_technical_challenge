@@ -35,6 +35,7 @@ const FileUpload = ({dataTypes}) => {
                 }).then(response => {
                     if (response.data === ''){
                         setCsvResponse("All in order on your csv file")
+                        setRecordsErrors([])
                     }
                     else{
                         if (response.data.error !== undefined){
@@ -70,6 +71,7 @@ const FileUpload = ({dataTypes}) => {
         setCsvFile(csv)
         setDisabled(false)
 
+        setRecordsErrors([])
         setCsvResponse("Use the submit button to check if your data passes validation.")
     }   
 

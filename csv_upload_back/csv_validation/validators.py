@@ -1,26 +1,95 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator, DecimalValidator, RegexValidator
 from django.forms import DecimalField, IntegerField
+import math
 
-def data_type_validator(value, data_type, n_decimals = None):
+
+def validate_extra(regex_value, value, message, test_value):
+    try:
+        val = RegexValidator(regex_value, message + test_value , "")
+        re = val(value)
+        return re
+    except ValidationError as e:
+        print(e)
+        return e
+    
+def data_type_validator(value, data_type, table_extra_validations = None):
+    print(table_extra_validations)
+    print(value)
+    if type(value) == "number":
+    
+        if math.isnan(value):
+            return "value is empty"
+    if len(str(value)) == 0:
+        return "value is empty"
+    
+
+    if (table_extra_validations != None):
+        data_type = table_extra_validations["basic_data_type"]
+    if (table_extra_validations["extra"] != None):
+        if data_type == "decimal":
+            if (table_extra_validations["extra"]["decimal_point"] != None):
+                print("ther eis decimal_point")
+                if table_extra_validations["extra"]["decimal_point"] == '.':
+                    val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
+                    if (val != None):
+                        return val
+                elif table_extra_validations["extra"]["decimal_point"] == ',':
+                    val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
+                    if (val != None):
+                        return val
+                    print(value)
+                    value = str(value).replace(",",".")
+                
+            if (table_extra_validations["extra"]["n_decimals"] != None):
+                print("ther eis n_decimals")
+                if table_extra_validations["extra"]["n_decimals"] == '.':
+                    val =validate_extra("^\d*\.\d{" + str(table_extra_validations["extra"]["n_decimals"]) + "}$", str(value), "value doesn't have correct number of decimals ", table_extra_validations["extra"]["n_decimals"])
+                    if (val != None):
+                        return val
+                elif table_extra_validations["extra"]["n_decimals"] == ',':
+                    val =validate_extra("^\d*\,\d{" + str(table_extra_validations["extra"]["n_decimals"]) + "}$", str(value), "value doesn't have correct number of decimals ", table_extra_validations["extra"]["n_decimals"])
+                    if (val != None):
+                        return val
+        
+        print(value)
+        if (table_extra_validations["extra"]["max_length"] != None):
+            print("ther eis max_len")
+            val = validate_extra("^.{1," + table_extra_validations["extra"]["max_length"] + "}$",str(value), "value is longer than ", table_extra_validations["extra"]["max_length"] )
+            if (val != None):
+                return val
+
+
+
+        if (table_extra_validations["extra"]["starting_with"] != None):
+            print("ther eis starting_with")
+            val = validate_extra("^"+table_extra_validations["extra"]["starting_with"],value, "value doesn't start with ", table_extra_validations["extra"]["starting_with"])
+            if (val != None):
+                return val
+        if (table_extra_validations["extra"]["ending_with"] != None):
+            print("ther eis ending")
+            val = validate_extra(""+table_extra_validations["extra"]["ending_with"] + "$", value, "value doesn't end with ", table_extra_validations["extra"]["ending_with"])
+            if (val != None):
+                return val
+        
+        if (table_extra_validations["extra"]["contains"] != None):
+            print("ther eis contain")
+            val =validate_extra("^.*" + str(table_extra_validations["extra"]["contains"]) + ".*$", str(value), "value doesn't contain ", table_extra_validations["extra"]["contains"])
+            if (val != None):
+                return val
+            
+        
+            
     match data_type:
         case "decimal":
-            # decimal_regex()
-            print('decimal')
-            # valid_decimal(value)
             reg = "\d\.\d"
             try:
                 val = RegexValidator(reg, "please provide a decimal number", "Wrong decimal format")
                 re = val(value)
-                print(re)
                 return True
             except ValidationError as e:
                 print(e)
                 return e
-                
-            # print(value)
-            # print(re)
-            # return val(value)
         case "integer":
             print('integer')
             # reg = 'r"[+-]?(?<!\.)\b[0-9]+\b(?!\.[0-9])"'
