@@ -38,7 +38,6 @@ def data_type_validator(value, data_type, table_extra_validations = None):
                     val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
                     if (val != None):
                         return val
-                    print(value)
                     value = str(value).replace(",",".")
                 
             if (table_extra_validations["extra"]["n_decimals"] != None):
