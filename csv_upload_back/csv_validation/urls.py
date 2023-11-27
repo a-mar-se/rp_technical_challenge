@@ -22,7 +22,8 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path("validate", views.ValidateView.as_view()),
+    path("validate_from_serializers", views.ValidateSerializerView.as_view()),
+    path("validate_from_validator", views.ValidatorView.as_view()),
     path('docs/', TemplateView.as_view(
         template_name='documentation.html',
         extra_context={'schema_url':'openapi-schema'}

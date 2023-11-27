@@ -24,14 +24,23 @@ const FileUpload = ({dataTypes}) => {
     const [recordsErrors,setRecordsErrors] = React.useState([])
 
     const api_url = "http://localhost:8000/"
-    const handleSubmission = async () => {
+
+    const validate_with_serializers = async () => {
+        await handleSubmission("validate_from_serializers")
+    }
+    
+    const validate_from_validator = async () => {
+        await handleSubmission("validate_from_validator")
+    }
+
+    const handleSubmission = async (route) => {
         if (csvFile !== null){
             const first_time = Date.now()
             let formData = new FormData();
             formData.append('file', csvFile);
             formData.append('table', JSON.stringify(dataTypes));
             try{
-                axios.post(api_url + "csv_validation/validate", formData, {
+                axios.post(api_url + "csv_validation/" + route, formData, {
                     headers: {
                       'Content-Type': 'multipart/form-data'
                     }
@@ -42,28 +51,16 @@ const FileUpload = ({dataTypes}) => {
                     }
                     else{
                         if (response.status === 202){
-                        // if (response.data.error !== undefined){
-                            // console.log(response)
                             setCsvResponse("Error during validation. Check the wrong values below.")
                             setRecordsErrors(response.data.error)
                         }
                         else{
                             setCsvResponse("API Error during validation: " + response.status)
-
                         }
                     }
                     const second_time = Date.now()
                     setTimeTaken((second_time - first_time) /1000)
                 }).catch(err=>console.error(err));
-
-                // const val = await axios.post(api_url + "csv_validation/validate",{
-                //     file: "fillli",
-                //     headers: {
-                //         "Access-Control-Allow-Origin": "*",
-                //         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
-                //     }
-
-                // }).then(response => response).catch(err=>console.error(err));
             }
             catch(error){
                 console.log({error})
@@ -93,7 +90,8 @@ const FileUpload = ({dataTypes}) => {
             <h3>Upload you CSV files here</h3>
             <div style={{display:"flex", flexDirection:"row", justifyContent:'center'}}>
                 <input type="file" name="file" onChange={changeHandler} />
-                <button onClick={handleSubmission} disabled={disabled}>Submit</button>
+                <button onClick={validate_with_serializers} disabled={disabled}>Validate using serializers(slower)</button>
+                <button onClick={validate_from_validator} disabled={disabled}>Validate using validator function (faster)</button>
             </div>
             {error !== "" ?
                 <div>{error}</div>
@@ -125,25 +123,30 @@ const FileUpload = ({dataTypes}) => {
                         :
                         <></>
                         }
-                    {recordsErrors.map((e,index)=>{
-                    if (index > maxDocuments){
-                        return <></>
-                    }
-                    return <div key={"error_" + index}>
+                    {recordsErrors.length > 0 ?
                         <div style={{display:'flex', flexDirection:"row"}}>
                             <div className="cell cell-header">entity_id</div>
                             <div className="cell cell-header">data_type</div>
                             <div className="cell cell-header">value</div>
                             <div className="cell cell-header">error description</div>
                         </div>
-                        <div style={{display:'flex', flexDirection:"row"}}>
-                            <div className="cell">{e.entity_id}</div>
-                            <div className="cell">{e.data_type}</div>
-                            <div className="cell">{e.value}</div>
-                            <div className="cell">{e.error_description}</div>
+                        :
+                        <></>
+                    }
+                    {recordsErrors.map((e,index)=>{
+                        if (index > maxDocuments){
+                            return <></>
+                        }
+                        return <div key={"error_" + index}>
+                            <div style={{display:'flex', flexDirection:"row"}}>
+                                <div className="cell">{e.entity_id}</div>
+                                <div className="cell">{e.data_type}</div>
+                                <div className="cell">{e.value}</div>
+                                <div className="cell">{e.error_description}</div>
+                            </div>
                         </div>
-                    </div>
-                })}</div>
+                    })}
+                </div>
                 :
                 <></>
             }
