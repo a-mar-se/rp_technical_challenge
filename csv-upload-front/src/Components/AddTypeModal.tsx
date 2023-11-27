@@ -85,7 +85,6 @@ const AddTypeModal = ({default_data_types, dataTypes, setDataTypes, closeModal, 
                     aux_extra_validations[key] = extraValidations[key].value
                 }
             }
-            console.log(aux_extra_validations)
             setExtraValidations(aux_extra_validations)
             // setExtraValidations(extraValidations.filter(elem=>{
             //     if (elem.type !== e.type){

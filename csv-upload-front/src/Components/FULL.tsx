@@ -207,7 +207,7 @@ const FileUpload = () => {
                 // style={customStyles}
                 contentLabel="Example Modal"
             >
-                <AddTypeModal default_data_types={default_data_types} dataTypes={dataTypes} setDataTypes={setDataTypes} closeModal={closeModal}/>
+                <AddTypeModal default_data_types={default_data_types} dataTypes={dataTypes} setDataTypes={setDataTypes} closeModal={closeModal} modalIsOpen={modalIsOpen}/>
             </Modal>
         </div>
     )

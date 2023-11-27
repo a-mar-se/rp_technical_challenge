@@ -21,8 +21,7 @@ const default_data_types:Array<DataTypeInterface> = [
   {data_type:"decimal", description:"Checks if it is a decimal number"},
   {data_type:"integer", description:"Checks if it is an integer number"},
   {data_type:"string", description:"Checks if it is a string"},
-  {data_type:"url", description:"Checks if it is a valid url"},
-  {data_type:"favicon", description:"Checks if it is a valid url"},
+  {data_type:"url", description:"Checks if it is a valid url"}
 ];
 
 

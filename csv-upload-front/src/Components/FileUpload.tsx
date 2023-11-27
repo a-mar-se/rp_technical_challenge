@@ -36,15 +36,20 @@ const FileUpload = ({dataTypes}) => {
                       'Content-Type': 'multipart/form-data'
                     }
                 }).then(response => {
-                    if (response.data === ''){
+                    if (response.status === 200){
                         setCsvResponse("All in order on your csv file")
                         setRecordsErrors([])
                     }
                     else{
-                        if (response.data.error !== undefined){
+                        if (response.status === 202){
+                        // if (response.data.error !== undefined){
                             // console.log(response)
                             setCsvResponse("Error during validation. Check the wrong values below.")
                             setRecordsErrors(response.data.error)
+                        }
+                        else{
+                            setCsvResponse("API Error during validation: " + response.status)
+
                         }
                     }
                     const second_time = Date.now()

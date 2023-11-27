@@ -23,10 +23,14 @@ def data_type_validator(value, data_type, table_extra_validations = None):
     if len(str(value)) == 0:
         return "value is empty"
     
-
-    if (table_extra_validations != None):
+    print("__________dfsdfsf__________________")
+    print(table_extra_validations)
+    # if (table_extra_validations["basic_data_type"] != None):
+    if hasattr(table_extra_validations, 'basic_data_type'):
         data_type = table_extra_validations["basic_data_type"]
-    if (table_extra_validations["extra"] != None):
+
+    if hasattr(table_extra_validations, 'extra'):
+    # if (table_extra_validations["extra"] != None):
         if data_type == "decimal":
             if (table_extra_validations["extra"]["decimal_point"] != None):
                 print("ther eis decimal_point")
