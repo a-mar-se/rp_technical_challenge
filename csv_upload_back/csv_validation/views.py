@@ -50,21 +50,25 @@ class ValidateSerializerView(APIView):
     )
 
     def post(self, request):
-        
+        # Extract file from the request
         csv_file = request.FILES["file"]
-        data_types_table = request.data["table"]
+        # Extract custom data_types defined on React
         data_types_table = json.loads(request.data["table"])
         response = Response()
 
+        # Read csv file
         r = pandas.read_csv(csv_file)
         csv_records = len(r.index)
         error_data = []
 
+        # read each row in the csv document
         for element_index in range(csv_records):
             element = r.iloc[element_index]
             data_type_found = False
+            # Check each data_type
             for dt_index in range(len(data_types_table)):
                 dt_checked = data_types_table[dt_index]
+                # If the data_type on the csv row exists, validate that data_type
                 if element["data_type"] == dt_checked["data_type"]:
                     data_type_found = True
 
@@ -78,15 +82,18 @@ class ValidateSerializerView(APIView):
                     )
 
                     try:
+                        # Validate data against the serializer
                         sd = serializer.is_valid(raise_exception=True)
                     except Exception as e:
+                        # In case of exception during validation, store the error into an array, to show all problems on the csv
                         for v in e.detail.values():
                             error_data.append({"value": str(element["data_value"]),"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": v[0]})
                         
-                
+            # Inform about a data_type existing on your csv file but not on your UI configuration    
             if data_type_found == False:
                 error_data.append({"value": str(element["data_value"]),"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": "has a data_type not defined. Define the data_type on the table above to validate."})
 
+        # In case of error, return a 202 status code
         if len(error_data) != 0:
             response.status_code = 202
             response.data={'error':error_data}

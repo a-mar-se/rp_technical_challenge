@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.generic import TemplateView
 from . import views
 
 from django.urls import re_path
@@ -24,10 +23,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("validate_from_serializers", views.ValidateSerializerView.as_view()),
     path("validate_from_validator", views.ValidatorView.as_view()),
-    path('docs/', TemplateView.as_view(
-        template_name='documentation.html',
-        extra_context={'schema_url':'openapi-schema'}
-    ), name='swagger-ui'),
 
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

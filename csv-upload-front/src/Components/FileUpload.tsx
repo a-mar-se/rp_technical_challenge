@@ -115,14 +115,7 @@ const FileUpload = ({dataTypes}) => {
                 
                 <div>
                     Total number of errors: {timeTaken=== 0 ? "calculating" : recordsErrors.length}
-                    {recordsErrors.length > maxDocuments ? 
-                        <div>
-                            <div>There are more many documents with errors, do you want to show more? Be aware! Browser can break (Uncaught InternalError: too much recursion)</div>
-                            <button onClick={showMore}>Show more</button>
-                        </div>
-                        :
-                        <></>
-                        }
+                    
                     {recordsErrors.length > 0 ?
                         <div style={{display:'flex', flexDirection:"row"}}>
                             <div className="cell cell-header">entity_id</div>
@@ -146,6 +139,13 @@ const FileUpload = ({dataTypes}) => {
                             </div>
                         </div>
                     })}
+                    {recordsErrors.length > maxDocuments ? 
+                        <div>
+                            <button onClick={showMore}>Show more</button>
+                        </div>
+                        :
+                        <></>
+                    }
                 </div>
                 :
                 <></>

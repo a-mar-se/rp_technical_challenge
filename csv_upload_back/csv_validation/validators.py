@@ -1,31 +1,30 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator, DecimalValidator, RegexValidator
-from django.forms import DecimalField, IntegerField
 import math
 
 
-def validate_extra(regex_value, value, message, test_value):
-    try:
-        val = RegexValidator(regex_value, message + test_value , "")
-        re = val(value)
-        return re
-    except ValidationError as e:
-        return e
+
     
 def data_type_validator(value, data_type, table_extra_validations = None):
+    # Return error if the value is a number NaN
     if type(value) == "number":
         if math.isnan(value):
             return "value is empty"
         
+    # Return error if value is empty
     if len(str(value)) == 0:
         return "value is empty"
     
+    # Check if the provided data_type is a custom one
     if table_extra_validations != None:
+        # Define the basic_data_type of the custom_data_type
         if 'basic_data_type' in table_extra_validations.keys():
             data_type = table_extra_validations["basic_data_type"]
 
+        # Validate extra conditions of the custom_data_type
         if 'extra' in table_extra_validations.keys():
             if (table_extra_validations["extra"] != None):
+                # In case the basic_data_type is decimal, we need to check the decimal point and the number of decimals
                 if data_type == "decimal":
                     if 'decimal_point' in table_extra_validations["extra"].keys():
                         if table_extra_validations["extra"]["decimal_point"] == '.':
@@ -102,9 +101,15 @@ def data_type_validator(value, data_type, table_extra_validations = None):
             except ValidationError as exception:
                 return exception
 
-
+def validate_extra(regex_value, value, message, test_value):
+    try:
+        val = RegexValidator(regex_value, message + test_value , "")
+        re = val(value)
+        return re
+    except ValidationError as e:
+        return e
+    
 def valid_url(value:str) -> bool:
-    # validator = URLValidator()
     try:
         URLValidator(value)
         return True

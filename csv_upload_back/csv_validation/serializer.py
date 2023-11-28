@@ -21,11 +21,9 @@ class EntitySerializer (ModelSerializer):
         fields = '__all__'
 
 
-    # def entity_validator(value, data_type, table_extra_validations = None):
     def validate_data_value(self, value):
-        data = self.get_initial() # data for all the fields
+        data = self.get_initial() 
         
-        # return value
         if type(value) == "number":
         
             if math.isnan(value):
@@ -36,12 +34,10 @@ class EntitySerializer (ModelSerializer):
         table_extra_validations = json.loads(data["table_extra_validations"])
         data_type = data["data_type"]
 
-        # if (table_extra_validations["basic_data_type"] != None):
         if hasattr(table_extra_validations, 'basic_data_type'):
             data_type = table_extra_validations["basic_data_type"]
 
         if hasattr(table_extra_validations, 'extra'):
-        # if (table_extra_validations["extra"] != None):
             if data_type == "decimal":
                 if (table_extra_validations["extra"]["decimal_point"] != None):
                     if table_extra_validations["extra"]["decimal_point"] == '.':
@@ -105,7 +101,6 @@ class EntitySerializer (ModelSerializer):
                 except ValidationError as e:
                     raise ValidationError(message="Please provide a valid url", code="Wrong integer format")
             case "string":
-                # decimal_regex()
                 reg = "\w"
                 try:
                     val = RegexValidator(reg, "please provide a string", "Wrong string format")
@@ -115,7 +110,6 @@ class EntitySerializer (ModelSerializer):
                     raise ValidationError(message="Please provide a string", code="Wrong string format")
             case "url":
                 try:
-                    # alive_validator = URLValidator(verify_exists=True
                     vaa = URLValidator(message = "Please provide a valid url")
                     rf = vaa(value)
                     return True
@@ -123,11 +117,6 @@ class EntitySerializer (ModelSerializer):
                     raise ValidationError(message="Please provide a valid url", code="Wrong url format")
 
 
-    # def validate_phone_number(self, value):
-    #     rule = re.compile(r'(^[+0-9]{1,3})*([0-9]{10,11}$)')
-    #     if not rule.search(value):
-    #         raise serializers.ValidationError("Invalid Phone Number")
-    #     return value
 
 
 def validate_extra(regex_value, value, message, test_value):
