@@ -5,18 +5,14 @@ import math
 
 
 def validate_extra(regex_value, value, message, test_value):
-    print("validatin extra")
     try:
         val = RegexValidator(regex_value, message + test_value , "")
         re = val(value)
         return re
     except ValidationError as e:
-        print(e)
         return e
     
 def data_type_validator(value, data_type, table_extra_validations = None):
-
-    print(table_extra_validations)
     if type(value) == "number":
         if math.isnan(value):
             return "value is empty"
@@ -81,7 +77,6 @@ def data_type_validator(value, data_type, table_extra_validations = None):
                 re = val(value)
                 return True
             except ValidationError as e:
-                print(e)
                 return e
         case "integer":
             reg = '^[-+]?\d+$'
@@ -90,7 +85,6 @@ def data_type_validator(value, data_type, table_extra_validations = None):
                 re = val(value)
                 return True
             except ValidationError as e:
-                print(e)
                 return e
         case "string":
             reg = "\w"
@@ -106,7 +100,6 @@ def data_type_validator(value, data_type, table_extra_validations = None):
                 vaa(value)
                 return True
             except ValidationError as exception:
-                print(exception)
                 return exception
 
 
@@ -114,29 +107,18 @@ def valid_url(value:str) -> bool:
     # validator = URLValidator()
     try:
         URLValidator(value)
-        # url is valid here
-        # do something, such as:
         return True
     except ValidationError as exception:
-        # URL is NOT valid here.
-        # handle exception..
-        print(exception)
         return False
     
 def valid_decimal(value:str, decimal_places = None) -> bool:
-    # validator = URLValidator()
     try:
         if (decimal_places != None):
             DecimalValidator(value, decimal_places=decimal_places)
         else:
             DecimalValidator(value)
-        # url is valid here
-        # do something, such as:
         return True
     except ValidationError as exception:
-        # URL is NOT valid here.
-        # handle exception..
-        print(exception)
         return False
     
 def regex_validator(reg,  message, code):
