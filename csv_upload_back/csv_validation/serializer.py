@@ -95,7 +95,7 @@ class EntitySerializer (ModelSerializer):
                     re = val(value)
                     return True
                 except ValidationError as e:
-                    raise ValidationError(message="Please provide a valid url", code="Invalid url")
+                    raise ValidationError(message="Please provide a decimal number", code="Wrong decimal format")
             case "integer":
                 reg = '^[-+]?\d+$'
                 try:
@@ -103,23 +103,24 @@ class EntitySerializer (ModelSerializer):
                     re = val(value)
                     return True
                 except ValidationError as e:
-                    raise ValidationError(message="Please provide a valid url", code="Invalid url")
+                    raise ValidationError(message="Please provide a valid url", code="Wrong integer format")
             case "string":
                 # decimal_regex()
                 reg = "\w"
                 try:
-                    val = RegexValidator(reg, "please provide a decimal number", "Wrong decimal format")
+                    val = RegexValidator(reg, "please provide a string", "Wrong string format")
                     re = val(value)
                     return True
                 except ValidationError as e:
-                    raise ValidationError(message="Please provide a valid url", code="Invalid url")
+                    raise ValidationError(message="Please provide a string", code="Wrong string format")
             case "url":
                 try:
+                    # alive_validator = URLValidator(verify_exists=True
                     vaa = URLValidator(message = "Please provide a valid url")
                     rf = vaa(value)
                     return True
                 except ValidationError as exception:
-                    raise ValidationError(message="Please provide a valid url", code="Invalid url")
+                    raise ValidationError(message="Please provide a valid url", code="Wrong url format")
 
 
     # def validate_phone_number(self, value):

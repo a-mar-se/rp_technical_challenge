@@ -15,6 +15,8 @@ def validate_extra(regex_value, value, message, test_value):
         return e
     
 def data_type_validator(value, data_type, table_extra_validations = None):
+
+    print(table_extra_validations)
     if type(value) == "number":
         if math.isnan(value):
             return "value is empty"
@@ -22,54 +24,54 @@ def data_type_validator(value, data_type, table_extra_validations = None):
     if len(str(value)) == 0:
         return "value is empty"
     
-    if 'basic_data_type' in table_extra_validations.keys():
-        data_type = table_extra_validations["basic_data_type"]
+    if table_extra_validations != None:
+        if 'basic_data_type' in table_extra_validations.keys():
+            data_type = table_extra_validations["basic_data_type"]
 
-    if 'extra' in table_extra_validations.keys():
-        if (table_extra_validations["extra"] != None):
-            if data_type == "decimal":
-                if (table_extra_validations["extra"]["decimal_point"] != None):
-                    if table_extra_validations["extra"]["decimal_point"] == '.':
-                        val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
-                        if (val != None):
-                            return val
-                    elif table_extra_validations["extra"]["decimal_point"] == ',':
-                        val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
-                        if (val != None):
-                            return val
-                        value = str(value).replace(",",".")
+        if 'extra' in table_extra_validations.keys():
+            if (table_extra_validations["extra"] != None):
+                if data_type == "decimal":
+                    if 'decimal_point' in table_extra_validations["extra"].keys():
+                        if table_extra_validations["extra"]["decimal_point"] == '.':
+                            val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
+                            if (val != None):
+                                return val
+                        elif table_extra_validations["extra"]["decimal_point"] == ',':
+                            val = validate_extra("^.*\\" + str(table_extra_validations["extra"]["decimal_point"]) + ".*$", str(value), "decimal point not found ", table_extra_validations["extra"]["decimal_point"])
+                            if (val != None):
+                                return val
+                            value = str(value).replace(",",".")
+                        
+                    if 'n_decimals' in table_extra_validations["extra"].keys():
+                        if table_extra_validations["extra"]["n_decimals"] == '.':
+                            val =validate_extra("^\d*\.\d{" + str(table_extra_validations["extra"]["n_decimals"]) + "}$", str(value), "value doesn't have correct number of decimals ", table_extra_validations["extra"]["n_decimals"])
+                            if (val != None):
+                                return val
+                        elif table_extra_validations["extra"]["n_decimals"] == ',':
+                            val =validate_extra("^\d*\,\d{" + str(table_extra_validations["extra"]["n_decimals"]) + "}$", str(value), "value doesn't have correct number of decimals ", table_extra_validations["extra"]["n_decimals"])
+                            if (val != None):
+                                return val
+                
+                if 'max_length' in table_extra_validations["extra"].keys():
+                    val = validate_extra("^.{1," + table_extra_validations["extra"]["max_length"] + "}$",str(value), "value is longer than ", table_extra_validations["extra"]["max_length"] )
+                    if (val != None):
+                        return val
                     
-                if (table_extra_validations["extra"]["n_decimals"] != None):
-                    if table_extra_validations["extra"]["n_decimals"] == '.':
-                        val =validate_extra("^\d*\.\d{" + str(table_extra_validations["extra"]["n_decimals"]) + "}$", str(value), "value doesn't have correct number of decimals ", table_extra_validations["extra"]["n_decimals"])
-                        if (val != None):
-                            return val
-                    elif table_extra_validations["extra"]["n_decimals"] == ',':
-                        val =validate_extra("^\d*\,\d{" + str(table_extra_validations["extra"]["n_decimals"]) + "}$", str(value), "value doesn't have correct number of decimals ", table_extra_validations["extra"]["n_decimals"])
-                        if (val != None):
-                            return val
-            
-            if (table_extra_validations["extra"]["max_length"] != None):
+                if 'starting_with' in table_extra_validations["extra"].keys():
+                    val = validate_extra("^"+table_extra_validations["extra"]["starting_with"],value, "value doesn't start with ", table_extra_validations["extra"]["starting_with"])
+                    if (val != None):
+                        return val
+                    
+                if 'ending_with' in table_extra_validations["extra"].keys():
+                    val = validate_extra(""+table_extra_validations["extra"]["ending_with"] + "$", value, "value doesn't end with ", table_extra_validations["extra"]["ending_with"])
+                    if (val != None):
+                        return val
                 
-                val = validate_extra("^.{1," + table_extra_validations["extra"]["max_length"] + "}$",str(value), "value is longer than ", table_extra_validations["extra"]["max_length"] )
-                if (val != None):
-                    return val
-
-            if (table_extra_validations["extra"]["starting_with"] != None):
-                val = validate_extra("^"+table_extra_validations["extra"]["starting_with"],value, "value doesn't start with ", table_extra_validations["extra"]["starting_with"])
-                if (val != None):
-                    return val
-                
-            if (table_extra_validations["extra"]["ending_with"] != None):
-                val = validate_extra(""+table_extra_validations["extra"]["ending_with"] + "$", value, "value doesn't end with ", table_extra_validations["extra"]["ending_with"])
-                if (val != None):
-                    return val
-            
-            if (table_extra_validations["extra"]["contains"] != None):
-                val =validate_extra("^.*" + str(table_extra_validations["extra"]["contains"]) + ".*$", str(value), "value doesn't contain ", table_extra_validations["extra"]["contains"])
-                if (val != None):
-                    return val
-                
+                if 'contains' in table_extra_validations["extra"].keys():
+                    val =validate_extra("^.*" + str(table_extra_validations["extra"]["contains"]) + ".*$", str(value), "value doesn't contain ", table_extra_validations["extra"]["contains"])
+                    if (val != None):
+                        return val
+                    
         
     match data_type:
         case "decimal":

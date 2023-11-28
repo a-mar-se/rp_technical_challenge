@@ -31,7 +31,7 @@ class ValidateSerializerView(APIView):
                 'table': openapi.Schema(
                     type=openapi.TYPE_OBJECT, properties={
                         'data_type': openapi.Schema(type=openapi.TYPE_STRING, description="Data_type"),
-
+                        'basic_data_type': openapi.Schema(type=openapi.TYPE_STRING, description="Basic data_type for custom data_types"),
                         'description': openapi.Schema(type=openapi.TYPE_STRING, description="Description of the type"),
                         'extra': openapi.Schema(type = openapi.TYPE_OBJECT, properties={
                             'starts_with': openapi.Schema(type=openapi.TYPE_STRING, description="Optional validation condition: starting with characters ..."),
@@ -41,7 +41,6 @@ class ValidateSerializerView(APIView):
                             'decimal_point': openapi.Schema(type=openapi.TYPE_STRING, description="Optional validation condition for decimal-based data_types: is the decimal point . or ,?"),
                             'n_decimals': openapi.Schema(type=openapi.TYPE_STRING, description="Optional validation condition for decimal-based data_types: how many decimals shoudld each value have?")
                         }),
-                        'basic_data_type': openapi.Schema(type=openapi.TYPE_STRING, description="Basic data_type for custom data_types"),
                     }
                 ),
             },
@@ -82,6 +81,8 @@ class ValidateSerializerView(APIView):
                     try:
                         sd = serializer.is_valid(raise_exception=True)
                     except Exception as e:
+                        print("errorrrr")
+                        print(e)
                         for v in e.detail.values():
                             error_data.append({"value": str(element["data_value"]),"entity_id": element["entity_id"], "data_type": element["data_type"], "error_description": v[0]})
                         
@@ -112,7 +113,7 @@ class ValidatorView(APIView):
                 'table': openapi.Schema(
                     type=openapi.TYPE_OBJECT, properties={
                         'data_type': openapi.Schema(type=openapi.TYPE_STRING, description="Data_type"),
-
+                        'basic_data_type': openapi.Schema(type=openapi.TYPE_STRING, description="Basic data_type for custom data_types"),
                         'description': openapi.Schema(type=openapi.TYPE_STRING, description="Description of the type"),
                         'extra': openapi.Schema(type = openapi.TYPE_OBJECT, properties={
                             'starts_with': openapi.Schema(type=openapi.TYPE_STRING, description="Optional validation condition: starting with characters ..."),
@@ -122,7 +123,6 @@ class ValidatorView(APIView):
                             'decimal_point': openapi.Schema(type=openapi.TYPE_STRING, description="Optional validation condition for decimal-based data_types: is the decimal point . or ,?"),
                             'n_decimals': openapi.Schema(type=openapi.TYPE_STRING, description="Optional validation condition for decimal-based data_types: how many decimals shoudld each value have?")
                         }),
-                        'basic_data_type': openapi.Schema(type=openapi.TYPE_STRING, description="Basic data_type for custom data_types"),
                     }
                 ),
             },
@@ -151,6 +151,7 @@ class ValidatorView(APIView):
 
                     # Old validation
                     # Check validations depending on the data type
+                    print(data_types_table[dt_index])
                     validation = data_type_validator(element["data_value"],dt_checked["data_type"], data_types_table[dt_index])
                     if (validation != True):
                         str_val = str(validation)
